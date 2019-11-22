@@ -8,4 +8,17 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <declare-styleable name="CircleView">
+        <attr name="CircleViewRadius" format="dimension" />
+        <attr name="CircleViewMarginCirclePoint" format="dimension" />
+        <attr name="CircleViewStartColor" format="color" />
+        <attr name="CircleViewEndColor" format="color" />
+        <attr name="CircleViewRadiusHideOrientation">
+            <enum name="top" value="0" />
+            <enum name="bottom" value="1" />
+            <enum name="left" value="2" />
+            <enum name="right" value="3" />
+        </attr>
+    </declare-styleable>
+
 </resources>

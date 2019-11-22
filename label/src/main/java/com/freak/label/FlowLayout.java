@@ -1,6 +1,7 @@
 package com.freak.label;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,10 @@ public class FlowLayout extends ViewGroup {
     private List<Integer> mLineWidth = new ArrayList<>();
     private List<Integer> mLineHeight = new ArrayList<>();
     private List<View> lineView = new ArrayList<>();
+    private static final int LEFT = -1;
+    private static final int CENTER = 0;
+    private static final int RIGHT = 1;
+    private int mGravity;
 
     public FlowLayout(Context context) {
         this(context, null);
@@ -24,6 +29,20 @@ public class FlowLayout extends ViewGroup {
 
     public FlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context, attrs);
+    }
+
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FlowLayout);
+        for (int i = 0; i < typedArray.getIndexCount(); i++) {
+            int attr = typedArray.getIndex(i);
+            if (attr == R.styleable.FlowLayout_label_gravity) {
+                mGravity = typedArray.getInteger(attr, LEFT);
+            }
+
+        }
+
+        typedArray.recycle();
     }
 
     @Override
@@ -116,6 +135,46 @@ public class FlowLayout extends ViewGroup {
         mLineWidth.add(lineWidth);
         mLineHeight.add(lineHeight);
         mAllViews.add(lineView);
+
+        int left = getPaddingLeft();
+        int top = getPaddingTop();
+        int lineNum = mAllViews.size();
+        for (int i = 0; i < lineNum; i++) {
+            lineView = mAllViews.get(i);
+            lineHeight = mLineHeight.get(i);
+            // set gravity
+            int currentLineWidth = this.mLineWidth.get(i);
+
+            switch (this.mGravity) {
+                case LEFT:
+                    left = getPaddingLeft();
+                    break;
+                case CENTER:
+                    left = (width - currentLineWidth) / 2 + getPaddingLeft();
+                    break;
+                case RIGHT:
+                    left = width - currentLineWidth + getPaddingLeft();
+                    break;
+            }
+
+            for (int j = 0; j < lineView.size(); j++) {
+                View child = lineView.get(j);
+                if (child.getVisibility() == View.GONE) {
+                    continue;
+                }
+                MarginLayoutParams marginLayoutParams = (MarginLayoutParams) child.getLayoutParams();
+                //计算相对与父容器的四个边的位置
+                int leftLayout = left + marginLayoutParams.leftMargin;
+                int topLayout = top + marginLayoutParams.topMargin;
+                int rightLayout = leftLayout + child.getMeasuredWidth();
+                int bottomLayout = topLayout + child.getMeasuredHeight();
+                //子 view的位置
+                child.layout(leftLayout, topLayout, rightLayout, bottomLayout);
+                left = child.getMeasuredWidth() + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+            }
+            top += lineHeight;
+        }
+
 
     }
 }
