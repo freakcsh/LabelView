@@ -3,12 +3,15 @@ package com.freak.label;
 import android.util.Log;
 import android.view.View;
 
+import java.util.HashSet;
 import java.util.List;
 
 
 public abstract class LabelAdapter<T> {
     private List<T> labelData;
     private OnDataChangeListener onDataChangeListener;
+    @Deprecated
+    private HashSet<Integer> mCheckedPosList = new HashSet<Integer>();
 
     public LabelAdapter(List<T> labelData) {
         this.labelData = labelData;
@@ -36,6 +39,11 @@ public abstract class LabelAdapter<T> {
         }
     }
 
+    @Deprecated
+    HashSet<Integer> getPreCheckedList() {
+        return mCheckedPosList;
+    }
+
     public T getItem(int position) {
         return labelData.get(position);
     }
@@ -54,7 +62,7 @@ public abstract class LabelAdapter<T> {
         return false;
     }
 
-    private interface OnDataChangeListener {
+     interface OnDataChangeListener {
         void onChange();
     }
 }

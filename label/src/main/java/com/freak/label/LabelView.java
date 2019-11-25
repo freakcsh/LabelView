@@ -4,8 +4,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Checkable;
+import android.widget.FrameLayout;
 
-public class LabelView extends FlowLayout implements Checkable {
+public class LabelView extends FrameLayout implements Checkable {
     private boolean isCheck;
     private static final int[] CHECK_STATE = new int[]{android.R.attr.state_checked};
 

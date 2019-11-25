@@ -3,6 +3,7 @@ package com.freak.label;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -61,6 +62,7 @@ public class FlowLayout extends ViewGroup {
         int lineHeight = 0;
 
         int childCount = getChildCount();
+        Log.e("TAG","  "+childCount);
         for (int i = 0; i < childCount; i++) {
             //获取子View
             View child = getChildAt(i);
@@ -119,7 +121,7 @@ public class FlowLayout extends ViewGroup {
             int childWidth = child.getMeasuredWidth();
             int childHeight = child.getMeasuredHeight();
             //子view超过屏幕宽度，则换行，反之，继续添加
-            if (width + lineWidth + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin > getWidth() - getPaddingLeft() - getPaddingRight()) {
+            if (childWidth + lineWidth + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin > width - getPaddingLeft() - getPaddingRight()) {
                 mLineHeight.add(lineHeight);
                 mAllViews.add(lineView);
                 mLineWidth.add(lineWidth);
@@ -128,7 +130,9 @@ public class FlowLayout extends ViewGroup {
                 lineHeight = childHeight + marginLayoutParams.topMargin + marginLayoutParams.bottomMargin;
                 lineView = new ArrayList<>();
             }
-            lineWidth = childWidth + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+            //记录单行所有子view宽度
+            lineWidth += childWidth + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+            //记录多行子view高度
             lineHeight = Math.max(lineHeight, childHeight + marginLayoutParams.topMargin + marginLayoutParams.bottomMargin);
             lineView.add(child);
         }
@@ -170,12 +174,15 @@ public class FlowLayout extends ViewGroup {
                 int bottomLayout = topLayout + child.getMeasuredHeight();
                 //子 view的位置
                 child.layout(leftLayout, topLayout, rightLayout, bottomLayout);
-                left = child.getMeasuredWidth() + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+                left += child.getMeasuredWidth() + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
             }
             top += lineHeight;
         }
+    }
 
-
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
     }
 
     @Override
@@ -186,10 +193,5 @@ public class FlowLayout extends ViewGroup {
     @Override
     protected LayoutParams generateLayoutParams(LayoutParams p) {
         return new MarginLayoutParams(p);
-    }
-
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new MarginLayoutParams(getContext(), attrs);
     }
 }

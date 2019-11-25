@@ -2,10 +2,17 @@ package com.freak.label;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataChangeListener {
@@ -21,7 +28,15 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
     }
 
     interface OnSelectedListener {
-        void onSeleted(Set<Integer> selectPosSet);
+        void onSelected(Set<Integer> selectPosSet);
+    }
+
+    public void setOnSelectedListener(OnSelectedListener onSelectedListener) {
+        this.onSelectedListener = onSelectedListener;
+    }
+
+    public void setOnLabelClickListener(OnLabelClickListener onLabelClickListener) {
+        this.onLabelClickListener = onLabelClickListener;
     }
 
     public LabelFlowLayout(Context context) {
@@ -63,13 +78,6 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public OnSelectedListener getOnSelectedListener() {
-        return onSelectedListener;
-    }
-
-    public OnLabelClickListener getOnLabelClickListener() {
-        return onLabelClickListener;
-    }
 
     public void setAdapter(LabelAdapter adapter) {
         labelAdapter = adapter;
@@ -81,11 +89,156 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
     public void changeAdapter() {
         removeAllViews();
         LabelAdapter adapter = labelAdapter;
-        LabelView labelView = null;
+        LabelView labelViewContainer = null;
+        HashSet preCheckedList = labelAdapter.getPreCheckedList();
+        for (int i = 0; i < adapter.getCount(); i++) {
+            View labelView = adapter.getView(this, i, adapter.getItem(i));
+            labelViewContainer = new LabelView(getContext());
+            labelView.setDuplicateParentStateEnabled(true);
+            //设置间距
+            if (labelView.getLayoutParams() != null) {
+                labelViewContainer.setLayoutParams(labelView.getLayoutParams());
+            } else {
+                MarginLayoutParams marginLayoutParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                marginLayoutParams.setMargins(dip2px(
+                        getContext(), 5),
+                        dip2px(getContext(), 5),
+                        dip2px(getContext(), 5),
+                        dip2px(getContext(), 5)
+                );
+                labelViewContainer.setLayoutParams(marginLayoutParams);
+            }
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            labelView.setLayoutParams(layoutParams);
+            labelViewContainer.addView(labelView);
+            addView(labelViewContainer);
+
+            if (preCheckedList.contains(i)) {
+                setChildChecked(i, labelViewContainer);
+            }
+            if (labelAdapter.setSelected(i, adapter.getItem(i))) {
+                setChildChecked(i, labelViewContainer);
+            }
+            labelView.setClickable(false);
+            final LabelView finalLabelViewContainer = labelViewContainer;
+            final int position = i;
+            labelViewContainer.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doSelect(finalLabelViewContainer, position);
+                    if (onLabelClickListener != null) {
+                        onLabelClickListener.onLabelClick(finalLabelViewContainer, position, LabelFlowLayout.this);
+                    }
+                }
+            });
+            mSelectedView.addAll(preCheckedList);
+        }
+    }
+
+    private void doSelect(LabelView child, int position) {
+        if (!child.isChecked()) {
+            if (selectedMax == 1 && mSelectedView.size() == 1) {
+                Iterator<Integer> iterator = mSelectedView.iterator();
+                Integer integer = iterator.next();
+                LabelView labelView = (LabelView) getChildAt(integer);
+                setChildUnChecked(integer, labelView);
+                setChildChecked(position, child);
+
+                mSelectedView.remove(integer);
+                mSelectedView.add(position);
+            } else {
+                if (selectedMax > 0 && mSelectedView.size() >= selectedMax) {
+                    return;
+                }
+                setChildChecked(position, child);
+                mSelectedView.add(position);
+            }
+        } else {
+            setChildUnChecked(position, child);
+            mSelectedView.remove(position);
+        }
+        if (onSelectedListener != null) {
+            onSelectedListener.onSelected(new HashSet<Integer>(mSelectedView));
+        }
+    }
+
+    private void setChildUnChecked(int position, LabelView view) {
+        view.setChecked(false);
+        labelAdapter.unSelected(position, view.getLabelView());
+    }
+
+    private void setChildChecked(int position, LabelView view) {
+        view.setChecked(true);
+        labelAdapter.onSelected(position, view.getLabelView());
+    }
+
+    private static final String KEY_CHOOSE_POS = "key_choose_pos";
+    private static final String KEY_DEFAULT = "key_default";
+
+    public void setSelectedMax(int selectedMax) {
+        if (mSelectedView.size() > selectedMax) {
+            Log.w(TAG, "you has already select more than " + selectedMax + " views , so it will be clear .");
+            mSelectedView.clear();
+        }
+        this.selectedMax = selectedMax;
+    }
+
+    public Set<Integer> getSelectedList() {
+        return new HashSet<Integer>(mSelectedView);
+    }
+
+    public LabelAdapter getLabelAdapter() {
+        return labelAdapter;
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_DEFAULT, super.onSaveInstanceState());
+        String selectPos = "";
+        if (mSelectedView.size() > 0) {
+            for (int key : mSelectedView) {
+                selectPos += key + "|";
+            }
+            selectPos = selectPos.substring(0, selectPos.length() - 1);
+        }
+        bundle.putString(KEY_CHOOSE_POS, selectPos);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            String mSelectPos = bundle.getString(KEY_CHOOSE_POS);
+            if (!TextUtils.isEmpty(mSelectPos)) {
+                String[] split = mSelectPos.split("\\|");
+                for (String pos : split) {
+                    int index = Integer.parseInt(pos);
+                    mSelectedView.add(index);
+
+                    LabelView labelView = (LabelView) getChildAt(index);
+                    if (labelView != null) {
+                        setChildChecked(index, labelView);
+                    }
+                }
+            }
+            super.onRestoreInstanceState(bundle.getParcelable(KEY_DEFAULT));
+            return;
+        }
+        super.onRestoreInstanceState(state);
     }
 
     @Override
     public void onChange() {
-
+        mSelectedView.clear();
+        changeAdapter();
     }
+
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
 }
