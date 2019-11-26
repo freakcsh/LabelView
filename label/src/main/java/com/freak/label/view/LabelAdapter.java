@@ -1,7 +1,11 @@
-package com.freak.label;
+package com.freak.label.view;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import com.freak.label.widget.FlowLayout;
 
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +52,7 @@ public abstract class LabelAdapter<T> {
         return labelData.get(position);
     }
 
-    public abstract View getView(FlowLayout parent, int position, T t);
+    public abstract View getView(ViewGroup parent, int position, T t);
 
     public void onSelected(int position, View view) {
         Log.d("freak", "onSelected " + position);

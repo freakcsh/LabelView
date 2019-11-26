@@ -1,4 +1,4 @@
-package com.freak.label;
+package com.freak.label.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+
+import com.freak.label.R;
+import com.freak.label.widget.FlowLayout;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +70,7 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            LabelView labelView = (LabelView) getChildAt(i);
+            LabelItemView labelView = (LabelItemView) getChildAt(i);
             if (labelView.getVisibility() == View.GONE) {
                 continue;
             }
@@ -89,11 +92,11 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
     public void changeAdapter() {
         removeAllViews();
         LabelAdapter adapter = labelAdapter;
-        LabelView labelViewContainer = null;
+        LabelItemView labelViewContainer = null;
         HashSet preCheckedList = labelAdapter.getPreCheckedList();
         for (int i = 0; i < adapter.getCount(); i++) {
             View labelView = adapter.getView(this, i, adapter.getItem(i));
-            labelViewContainer = new LabelView(getContext());
+            labelViewContainer = new LabelItemView(getContext());
             labelView.setDuplicateParentStateEnabled(true);
             //设置间距
             if (labelView.getLayoutParams() != null) {
@@ -120,7 +123,7 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
                 setChildChecked(i, labelViewContainer);
             }
             labelView.setClickable(false);
-            final LabelView finalLabelViewContainer = labelViewContainer;
+            final LabelItemView finalLabelViewContainer = labelViewContainer;
             final int position = i;
             labelViewContainer.setOnClickListener(new OnClickListener() {
                 @Override
@@ -135,12 +138,12 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
         }
     }
 
-    private void doSelect(LabelView child, int position) {
+    private void doSelect(LabelItemView child, int position) {
         if (!child.isChecked()) {
             if (selectedMax == 1 && mSelectedView.size() == 1) {
                 Iterator<Integer> iterator = mSelectedView.iterator();
                 Integer integer = iterator.next();
-                LabelView labelView = (LabelView) getChildAt(integer);
+                LabelItemView labelView = (LabelItemView) getChildAt(integer);
                 setChildUnChecked(integer, labelView);
                 setChildChecked(position, child);
 
@@ -162,12 +165,12 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
         }
     }
 
-    private void setChildUnChecked(int position, LabelView view) {
+    private void setChildUnChecked(int position, LabelItemView view) {
         view.setChecked(false);
         labelAdapter.unSelected(position, view.getLabelView());
     }
 
-    private void setChildChecked(int position, LabelView view) {
+    private void setChildChecked(int position, LabelItemView view) {
         view.setChecked(true);
         labelAdapter.onSelected(position, view.getLabelView());
     }
@@ -218,7 +221,7 @@ public class LabelFlowLayout extends FlowLayout implements LabelAdapter.OnDataCh
                     int index = Integer.parseInt(pos);
                     mSelectedView.add(index);
 
-                    LabelView labelView = (LabelView) getChildAt(index);
+                    LabelItemView labelView = (LabelItemView) getChildAt(index);
                     if (labelView != null) {
                         setChildChecked(index, labelView);
                     }

@@ -1,4 +1,4 @@
-package com.freak.label;
+package com.freak.label.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 
-public class LabelView extends FrameLayout implements Checkable {
+public class LabelItemView extends FrameLayout implements Checkable {
     private boolean isCheck;
     private static final int[] CHECK_STATE = new int[]{android.R.attr.state_checked};
 
@@ -14,15 +14,15 @@ public class LabelView extends FrameLayout implements Checkable {
         return getChildAt(0);
     }
 
-    public LabelView(Context context) {
+    public LabelItemView(Context context) {
         super(context);
     }
 
-    public LabelView(Context context, AttributeSet attrs) {
+    public LabelItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public LabelView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LabelItemView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
