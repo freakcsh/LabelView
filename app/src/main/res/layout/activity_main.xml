@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--<androidx.core.widget.NestedScrollView android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android">-->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -98,6 +102,7 @@
         android:id="@+id/label"
         app:childSpacingForLastRow="align"
         app:startRight="false"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 <!--    <com.freak.label.view.LabelFlowLayout1-->
@@ -114,4 +119,19 @@
         android:layout_marginLeft="10dp"
         android:text="测试"
         android:gravity="center"/>
+
+    <com.freak.label.widget.KingoitFlowLayout
+        android:id="@+id/kingoit_flow_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        app:flowLayoutDeleteBtnColor="@color/colorPrimary"
+        app:flowLayoutLineWidth="1dp"
+        app:flowLayoutRadius="50dp"
+        android:visibility="gone"
+        app:flowLayoutTextColor="@color/colorPrimary"
+        app:flowLayoutTextColorSelector="@color/colorPrimary"
+        app:flowLayoutTextSize="16sp"/>
+
 </LinearLayout>
+<!--</androidx.core.widget.NestedScrollView>-->

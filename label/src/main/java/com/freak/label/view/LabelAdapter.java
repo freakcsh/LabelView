@@ -3,9 +3,8 @@ package com.freak.label.view;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import com.freak.label.widget.FlowLayout;
+
 
 import java.util.HashSet;
 import java.util.List;
